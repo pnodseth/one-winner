@@ -62,8 +62,8 @@ class Movable {
         let collidedOnLeftSide = this.currentPosition.x < m.currentPosition.x + (padding - 20) && this.currentPosition.x > m.currentPosition.x;
         let collidedOnRightSide = this.currentPosition.x < m.currentPosition.x + padding && this.currentPosition.x > m.currentPosition.x - padding;
 
-        let collidedOnTopSide = this.currentPosition.y < m.currentPosition.y + (padding + 20) && this.currentPosition.y > m.currentPosition.y;
-        let collidedOnBottomSide = this.currentPosition.y < m.currentPosition.y && this.currentPosition.y > m.currentPosition.y - padding;
+        let collidedOnTopSide = this.currentPosition.y < m.currentPosition.y + padding && this.currentPosition.y > m.currentPosition.y;
+        let collidedOnBottomSide = this.currentPosition.y < m.currentPosition.y && this.currentPosition.y > m.currentPosition.y - (padding + 20);
 
         if (collidedOnLeftSide && collidedOnTopSide) {
           console.log("LEFT TOP");
