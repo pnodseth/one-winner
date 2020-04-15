@@ -19,7 +19,7 @@ class Movable {
     this.speed = 2;
     this.board = ctx;
     this.boardSize = boardSize;
-    this.radius = 50;
+    this.radius = 100;
     this.isMovable = isMovable;
   }
 
@@ -38,37 +38,13 @@ class Movable {
 
   animate() {
     if (this.isMovable) {
-      if (this.currentPosition.x <= this.boardBounds.width + 3 && this.currentPosition.y <= this.boardBounds.height + 3) {
+      if (this.currentPosition.x <= this.boardBounds.width + 10 && this.currentPosition.y <= this.boardBounds.height + 10) {
         this.board.moveTo(this.currentPosition.x, this.currentPosition.y);
         this.board.arc(this.currentPosition.x, this.currentPosition.y, this.radius, 0, 2 * Math.PI);
 
-        if (this.currentPosition.y >= this.boardBounds.height) {
-          this.goingUp = true;
-          this.angle.y = 1 - this.angle.y - (Math.random() * (0.3 - 0.1) + 0.1);
-        } else if (this.currentPosition.y <= this.radius) {
-          this.goingUp = false;
-          this.angle.y = 1 - this.angle.y;
-        }
-
-        if (this.currentPosition.x >= this.boardBounds.width) {
-          this.goingLeft = true;
-          this.angle.x = 1 - this.angle.x - (Math.random() * (0.15 - 0.1) + 0.1);
-        } else if (this.currentPosition.x <= this.radius) {
-          this.goingLeft = false;
-          this.angle.x = 1 - this.angle.x;
-        }
-
-        if (!this.goingUp) {
-          this.currentPosition.y += this.angle.y * this.speed;
-        } else {
-          this.currentPosition.y -= this.angle.y * this.speed;
-        }
-
-        if (!this.goingLeft) {
-          this.currentPosition.x += this.angle.x * this.speed;
-        } else {
-          this.currentPosition.x -= this.angle.x * this.speed;
-        }
+        this.checkIfReachedBounds();
+        this.checkCollisions();
+        this.updateXandYPosition();
       }
 
       /* PAINT NOW MOVABLES */
@@ -78,10 +54,83 @@ class Movable {
     }
   }
 
-  checkIfReachedBoarders
+  checkCollisions() {
+    let collided = false;
+    for (let m of movables) {
+      if (m.id !== this.id) {
+        let padding = m.radius + this.radius;
+        let collidedOnLeftSide = this.currentPosition.x > m.currentPosition.x - padding && this.currentPosition.x < m.currentPosition.x + padding;
+        let collidedOnRightSide = this.currentPosition.x < m.currentPosition.x + padding && this.currentPosition.x > m.currentPosition.x - padding;
 
-  test() {
-    console.log("my god!");
+        let collidedOnTopSide = this.currentPosition.y > m.currentPosition.y - padding && this.currentPosition.y < m.currentPosition.y + padding;
+        let collidedOnBottomSide = this.currentPosition.y < m.currentPosition.y + padding && this.currentPosition.y > m.currentPosition.y;
+
+        if (collidedOnLeftSide) {
+          if (collidedOnBottomSide) {
+            this.goingLeft = false;
+            this.goingUp = false;
+            console.log("left bottom");
+            break;
+          }
+
+          if (collidedOnTopSide) {
+            this.goingLeft = false;
+            this.goingUp = true;
+            console.log("left top");
+            break;
+          }
+        } else if (collidedOnRightSide) {
+          if (this.currentPosition.y < m.currentPosition.y && this.currentPosition.y > m.currentPosition.y - padding) {
+            this.goingLeft = true;
+            this.goingUp = false;
+            break;
+            console.log("now left!");
+          } else if (this.currentPosition.y > m.currentPosition.y && this.currentPosition.y < m.currentPosition.y + padding) {
+            this.goingLeft = true;
+            this.goingUp = true;
+            break;
+          }
+        }
+      }
+    }
+    return collided;
+  }
+
+  updateXandYPosition() {
+    if (!this.goingUp) {
+      this.currentPosition.y += this.angle.y * this.speed;
+    } else {
+      this.currentPosition.y -= this.angle.y * this.speed;
+    }
+
+    if (!this.goingLeft) {
+      this.currentPosition.x += this.angle.x * this.speed;
+    } else {
+      this.currentPosition.x -= this.angle.x * this.speed;
+    }
+  }
+
+  checkIfReachedBounds() {
+    /* Check if we're reached the top */
+    if (this.currentPosition.y <= this.radius) {
+      this.goingUp = false;
+      this.angle.y = 1 - this.angle.y;
+    }
+
+    /* Check if we've reached the bottom */
+    if (this.currentPosition.y >= this.boardBounds.height) {
+      this.goingUp = true;
+      this.angle.y = 1 - this.angle.y - (Math.random() * (0.3 - 0.1) + 0.1);
+    }
+
+    /* Check if we've reached left or right bound */
+    if (this.currentPosition.x >= this.boardBounds.width) {
+      this.goingLeft = true;
+      this.angle.x = 1 - this.angle.x - (Math.random() * (0.15 - 0.1) + 0.1);
+    } else if (this.currentPosition.x <= this.radius) {
+      this.goingLeft = false;
+      this.angle.x = 1 - this.angle.x;
+    }
   }
 }
 
@@ -90,7 +139,7 @@ const height = canvas.clientHeight;
 
 function generateMovable({ isMovable }) {
   let startPosition = {
-    x: Math.random() * 600 + 50,
+    x: Math.random() * 800 + 50,
     y: Math.random() * 600 + 50
   };
   let direction = {
