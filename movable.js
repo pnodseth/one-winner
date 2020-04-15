@@ -59,13 +59,37 @@ class Movable {
     for (let m of movables) {
       if (m.id !== this.id) {
         let padding = m.radius + this.radius;
-        let collidedOnLeftSide = this.currentPosition.x > m.currentPosition.x - padding && this.currentPosition.x < m.currentPosition.x + padding;
+        let collidedOnLeftSide = this.currentPosition.x < m.currentPosition.x + (padding - 20) && this.currentPosition.x > m.currentPosition.x;
         let collidedOnRightSide = this.currentPosition.x < m.currentPosition.x + padding && this.currentPosition.x > m.currentPosition.x - padding;
 
-        let collidedOnTopSide = this.currentPosition.y > m.currentPosition.y - padding && this.currentPosition.y < m.currentPosition.y + padding;
-        let collidedOnBottomSide = this.currentPosition.y < m.currentPosition.y + padding && this.currentPosition.y > m.currentPosition.y;
+        let collidedOnTopSide = this.currentPosition.y < m.currentPosition.y + (padding + 20) && this.currentPosition.y > m.currentPosition.y;
+        let collidedOnBottomSide = this.currentPosition.y < m.currentPosition.y && this.currentPosition.y > m.currentPosition.y - padding;
 
-        if (collidedOnLeftSide) {
+        if (collidedOnLeftSide && collidedOnTopSide) {
+          console.log("LEFT TOP");
+          //console.log("left collide");
+          let xDiff = this.currentPosition.x - m.currentPosition.x;
+          let yDiff = this.currentPosition.y - m.currentPosition.y;
+          if (xDiff > yDiff) {
+            //console.log("coming from left");
+            this.goingLeft = false;
+          } else {
+            //console.log("coming from bottom");
+            this.goingUp = false;
+          }
+        } else if (collidedOnLeftSide && collidedOnBottomSide) {
+          console.log("LEFT BOTTOM");
+          let xDiff = this.currentPosition.x - m.currentPosition.x;
+          let yDiff = m.currentPosition.y - this.currentPosition.y;
+          if (xDiff > yDiff) {
+            //console.log("coming from left");
+            this.goingLeft = false;
+          } else {
+            //console.log("coming from bottom");
+            this.goingUp = true;
+          }
+        }
+        /* if (collidedOnLeftSide) {
           if (collidedOnBottomSide) {
             this.goingLeft = false;
             this.goingUp = false;
@@ -90,7 +114,7 @@ class Movable {
             this.goingUp = true;
             break;
           }
-        }
+        } */
       }
     }
     return collided;
