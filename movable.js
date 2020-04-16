@@ -1,5 +1,5 @@
 export default class Movable {
-  constructor(ctx, boardSize, startPosition, direction, isMovable, isInfected = false, collidables = []) {
+  constructor({ ctx, boardSize, startPosition, direction, isMovable, isInfected = false, collidables = [], type = "circle" }) {
     this.id = this.generateRandomId();
     this.goingUp = this.goingUp = direction.goingUp;
     this.goingLeft = direction.goingLeft;
@@ -16,6 +16,7 @@ export default class Movable {
     this.isInfected = isInfected;
     this.showInfection = isInfected ? true : false;
     this.collidables = collidables;
+    this.type = type;
   }
 
   init() {
@@ -30,19 +31,20 @@ export default class Movable {
   }
 
   render() {
-    this.board.moveTo(this.currentPosition.x, this.currentPosition.y);
-    this.board.arc(this.currentPosition.x, this.currentPosition.y, this.radius, 0, 2 * Math.PI);
+    if (this.type === "circle") {
+      this.board.fillStyle = this.getFillColor();
+      this.board.beginPath();
+      this.board.arc(this.currentPosition.x, this.currentPosition.y, this.radius, 0, 2 * Math.PI);
+      this.board.fill();
+    } else if (this.type === "rect") {
+    }
   }
 
   animate() {
-    if (this.isMovable) {
-      if (this.currentPosition.x <= this.boardBounds.width + 10 && this.currentPosition.y <= this.boardBounds.height + 10) {
-        this.board.fillStyle = this.getFillColor();
-        this.board.beginPath();
-        //this.board.moveTo(this.currentPosition.x, this.currentPosition.y);
-        this.board.arc(this.currentPosition.x, this.currentPosition.y, this.radius, 0, 2 * Math.PI);
-        this.board.fill();
+    if (this.currentPosition.x <= this.boardBounds.width + 10 && this.currentPosition.y <= this.boardBounds.height + 10) {
+      this.render();
 
+      if (this.isMovable) {
         this.checkIfReachedBounds();
         let collidedWith = this.checkCollisions();
         if (collidedWith) {
@@ -54,24 +56,6 @@ export default class Movable {
           }
         }
         this.updateXandYPosition();
-      }
-
-      /* PAINT NOW MOVABLES */
-    } else {
-      this.board.fillStyle = this.getFillColor();
-      this.board.beginPath();
-      //this.board.moveTo(this.currentPosition.x, this.currentPosition.y);
-      this.board.arc(this.currentPosition.x, this.currentPosition.y, this.radius, 0, 2 * Math.PI);
-      this.board.fill();
-
-      let collidedWith = this.checkCollisions();
-      if (collidedWith) {
-        if (this.isInfected && !collidedWith.isInfected) {
-          collidedWith.isInfected = true;
-          setTimeout(() => {
-            collidedWith.showInfection = true;
-          }, 10000);
-        }
       }
     }
   }
