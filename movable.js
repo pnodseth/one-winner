@@ -1,11 +1,3 @@
-const canvas = document.getElementById("canvas");
-const c = canvas.getContext("2d");
-c.lineWidth = 1;
-
-/* setInterval(() => {
-  this.animate(c);
-}, 1); */
-
 class Movable {
   constructor(ctx, boardSize, startPosition, direction, isMovable) {
     this.id = generateRandomId();
@@ -140,55 +132,48 @@ class Movable {
   }
 }
 
-const width = canvas.clientWidth;
-const height = canvas.clientHeight;
+const canvas = document.getElementById("canvas");
+const movables = [];
+start(canvas);
 
-function generateMovable({ isMovable }) {
+function start(canvas) {
+  const canvasWidth = canvas.clientWidth;
+  const canvasHeight = canvas.clientHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.lineWidth = 1;
+
+  for (let n of new Array(505)) {
+    let movable = generateMovable({ isMovable: true, width: canvasWidth, height: canvasHeight, ctx });
+    movables.push(movable);
+    movable.init();
+  }
+
+  /* ANIMATE */
+  setInterval(() => {
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.beginPath();
+    for (let i = 0; i < movables.length; i++) {
+      let movable = movables[i];
+      movable.animate();
+    }
+    ctx.fill();
+  }, 1);
+}
+
+function generateMovable({ isMovable, width, height, ctx }) {
   let startPosition = {
-    x: Math.random() * 800 + 50,
-    y: Math.random() * 600 + 50
+    x: Math.random() * width,
+    y: Math.random() * height + 50
   };
   let direction = {
     goingUp: Math.random() < 0.5 ? true : false,
     goingLeft: Math.random() < 0.5 ? true : false
   };
 
-  return new Movable(c, { width, height }, startPosition, direction, isMovable);
+  return new Movable(ctx, { width, height }, startPosition, direction, isMovable);
 }
-
-const movables = [];
-
-for (let n of new Array(505)) {
-  let movable = generateMovable({ isMovable: true });
-  movables.push(movable);
-  movable.init();
-}
-
-/* let movable1 = generateMovable({ isMovable: true });
-let movable2 = generateMovable({ isMovable: false });
-
-movables.push(movable1, movable2); */
 
 /* INIT */
-c.beginPath();
-for (let m of movables) {
-  m.init();
-}
-c.fill();
-
-/* ANIMATE */
-setInterval(() => {
-  c.clearRect(0, 0, width, height);
-  c.beginPath();
-  for (let i = 0; i < movables.length; i++) {
-    let movable = movables[i];
-    movable.animate();
-  }
-
-  c.fill();
-}, 1);
-
-window.movables = movables;
 
 function generateRandomId() {
   return Math.floor((1 + Math.random()) * 0x10000)
