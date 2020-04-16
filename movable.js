@@ -1,6 +1,6 @@
-class Movable {
-  constructor(ctx, boardSize, startPosition, direction, isMovable) {
-    this.id = generateRandomId();
+export default class Movable {
+  constructor(ctx, boardSize, startPosition, direction, isMovable, isInfected = false, collidables = []) {
+    this.id = this.generateRandomId();
     this.goingUp = this.goingUp = direction.goingUp;
     this.goingLeft = direction.goingLeft;
     this.angle = {
@@ -11,13 +11,15 @@ class Movable {
     this.speed = 1;
     this.board = ctx;
     this.boardSize = boardSize;
-    this.radius = 5;
+    this.radius = 50;
     this.isMovable = isMovable;
+    this.isInfected = isInfected;
+    this.showInfection = isInfected ? true : false;
+    this.collidables = collidables;
   }
 
   init() {
-    this.board.moveTo(this.currentPosition.x, this.currentPosition.y);
-    this.board.arc(this.currentPosition.x, this.currentPosition.y, this.radius, 0, 2 * Math.PI);
+    this.render();
   }
 
   get boardBounds() {
@@ -27,27 +29,60 @@ class Movable {
     };
   }
 
+  render() {
+    this.board.moveTo(this.currentPosition.x, this.currentPosition.y);
+    this.board.arc(this.currentPosition.x, this.currentPosition.y, this.radius, 0, 2 * Math.PI);
+  }
+
   animate() {
     if (this.isMovable) {
       if (this.currentPosition.x <= this.boardBounds.width + 10 && this.currentPosition.y <= this.boardBounds.height + 10) {
-        this.board.moveTo(this.currentPosition.x, this.currentPosition.y);
+        this.board.fillStyle = this.getFillColor();
+        this.board.beginPath();
+        //this.board.moveTo(this.currentPosition.x, this.currentPosition.y);
         this.board.arc(this.currentPosition.x, this.currentPosition.y, this.radius, 0, 2 * Math.PI);
+        this.board.fill();
 
         this.checkIfReachedBounds();
-        this.checkCollisions();
+        let collidedWith = this.checkCollisions();
+        if (collidedWith) {
+          if (this.isInfected && !collidedWith.isInfected) {
+            collidedWith.isInfected = true;
+            setTimeout(() => {
+              collidedWith.showInfection = true;
+            }, 10000);
+          }
+        }
         this.updateXandYPosition();
       }
 
       /* PAINT NOW MOVABLES */
     } else {
-      this.board.moveTo(this.currentPosition.x, this.currentPosition.y);
+      this.board.fillStyle = this.getFillColor();
+      this.board.beginPath();
+      //this.board.moveTo(this.currentPosition.x, this.currentPosition.y);
       this.board.arc(this.currentPosition.x, this.currentPosition.y, this.radius, 0, 2 * Math.PI);
+      this.board.fill();
+
+      let collidedWith = this.checkCollisions();
+      if (collidedWith) {
+        if (this.isInfected && !collidedWith.isInfected) {
+          collidedWith.isInfected = true;
+          setTimeout(() => {
+            collidedWith.showInfection = true;
+          }, 10000);
+        }
+      }
     }
   }
 
+  getFillColor() {
+    if (this.isInfected && this.showInfection) return "tomato";
+    else return "#333";
+  }
+
   checkCollisions() {
-    let collided = false;
-    for (let m of movables) {
+    for (let m of this.collidables) {
       if (m.id !== this.id) {
         let padding = (m.radius + this.radius) * 0.85;
         let collidedOnLeftSide = this.currentPosition.x < m.currentPosition.x + padding && this.currentPosition.x > m.currentPosition.x; //correct
@@ -64,6 +99,7 @@ class Movable {
           } else {
             this.goingUp = false;
           }
+          return m;
         } else if (collidedOnLeftSide && collidedOnBottomSide) {
           let xDiff = this.currentPosition.x - m.currentPosition.x;
           let yDiff = m.currentPosition.y - this.currentPosition.y;
@@ -72,6 +108,7 @@ class Movable {
           } else {
             this.goingUp = true;
           }
+          return m;
         } else if (collidedOnRightSide && collidedOnTopSide) {
           let xDiff = m.currentPosition.x - this.currentPosition.x;
           let yDiff = this.currentPosition.y - m.currentPosition.y;
@@ -80,6 +117,7 @@ class Movable {
           } else {
             this.goingUp = false;
           }
+          return m;
         } else if (collidedOnRightSide && collidedOnBottomSide) {
           let xDiff = m.currentPosition.x - this.currentPosition.x;
           let yDiff = m.currentPosition.y - this.currentPosition.y;
@@ -88,10 +126,11 @@ class Movable {
           } else {
             this.goingUp = true;
           }
+          return m;
         }
       }
     }
-    return collided;
+    return null;
   }
 
   updateXandYPosition() {
@@ -130,53 +169,10 @@ class Movable {
       this.angle.x = 1 - this.angle.x;
     }
   }
-}
 
-const canvas = document.getElementById("canvas");
-const movables = [];
-start(canvas);
-
-function start(canvas) {
-  const canvasWidth = canvas.clientWidth;
-  const canvasHeight = canvas.clientHeight;
-  const ctx = canvas.getContext("2d");
-  ctx.lineWidth = 1;
-
-  for (let n of new Array(505)) {
-    let movable = generateMovable({ isMovable: true, width: canvasWidth, height: canvasHeight, ctx });
-    movables.push(movable);
-    movable.init();
+  generateRandomId() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
   }
-
-  /* ANIMATE */
-  setInterval(() => {
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    ctx.beginPath();
-    for (let i = 0; i < movables.length; i++) {
-      let movable = movables[i];
-      movable.animate();
-    }
-    ctx.fill();
-  }, 1);
-}
-
-function generateMovable({ isMovable, width, height, ctx }) {
-  let startPosition = {
-    x: Math.random() * width,
-    y: Math.random() * height + 50
-  };
-  let direction = {
-    goingUp: Math.random() < 0.5 ? true : false,
-    goingLeft: Math.random() < 0.5 ? true : false
-  };
-
-  return new Movable(ctx, { width, height }, startPosition, direction, isMovable);
-}
-
-/* INIT */
-
-function generateRandomId() {
-  return Math.floor((1 + Math.random()) * 0x10000)
-    .toString(16)
-    .substring(1);
 }
