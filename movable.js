@@ -16,15 +16,14 @@ class Movable {
       y: 0.5
     };
     this.currentPosition = startPosition;
-    this.speed = 2;
+    this.speed = 1;
     this.board = ctx;
     this.boardSize = boardSize;
-    this.radius = 100;
+    this.radius = 5;
     this.isMovable = isMovable;
   }
 
   init() {
-    console.log(this.boardBounds);
     this.board.moveTo(this.currentPosition.x, this.currentPosition.y);
     this.board.arc(this.currentPosition.x, this.currentPosition.y, this.radius, 0, 2 * Math.PI);
   }
@@ -58,63 +57,46 @@ class Movable {
     let collided = false;
     for (let m of movables) {
       if (m.id !== this.id) {
-        let padding = m.radius;
-        let collidedOnLeftSide = this.currentPosition.x < m.currentPosition.x + padding && this.currentPosition.x > m.currentPosition.x;
-        let collidedOnRightSide = this.currentPosition.x < m.currentPosition.x + padding && this.currentPosition.x > m.currentPosition.x - padding;
+        let padding = (m.radius + this.radius) * 0.85;
+        let collidedOnLeftSide = this.currentPosition.x < m.currentPosition.x + padding && this.currentPosition.x > m.currentPosition.x; //correct
+        let collidedOnRightSide = this.currentPosition.x > m.currentPosition.x - padding && this.currentPosition.x < m.currentPosition.x; // corect
 
         let collidedOnTopSide = this.currentPosition.y < m.currentPosition.y + padding && this.currentPosition.y > m.currentPosition.y;
         let collidedOnBottomSide = this.currentPosition.y < m.currentPosition.y && this.currentPosition.y > m.currentPosition.y - padding;
 
         if (collidedOnLeftSide && collidedOnTopSide) {
-          console.log("LEFT TOP");
-          //console.log("left collide");
           let xDiff = this.currentPosition.x - m.currentPosition.x;
           let yDiff = this.currentPosition.y - m.currentPosition.y;
           if (xDiff > yDiff) {
-            //console.log("coming from left");
             this.goingLeft = false;
           } else {
-            //console.log("coming from bottom");
             this.goingUp = false;
           }
         } else if (collidedOnLeftSide && collidedOnBottomSide) {
-          console.log("LEFT BOTTOM");
           let xDiff = this.currentPosition.x - m.currentPosition.x;
           let yDiff = m.currentPosition.y - this.currentPosition.y;
           if (xDiff > yDiff) {
-            //console.log("coming from left");
             this.goingLeft = false;
           } else {
-            //console.log("coming from bottom");
+            this.goingUp = true;
+          }
+        } else if (collidedOnRightSide && collidedOnTopSide) {
+          let xDiff = m.currentPosition.x - this.currentPosition.x;
+          let yDiff = this.currentPosition.y - m.currentPosition.y;
+          if (xDiff > yDiff) {
+            this.goingLeft = true;
+          } else {
+            this.goingUp = false;
+          }
+        } else if (collidedOnRightSide && collidedOnBottomSide) {
+          let xDiff = m.currentPosition.x - this.currentPosition.x;
+          let yDiff = m.currentPosition.y - this.currentPosition.y;
+          if (xDiff > yDiff) {
+            this.goingLeft = true;
+          } else {
             this.goingUp = true;
           }
         }
-        /* if (collidedOnLeftSide) {
-          if (collidedOnBottomSide) {
-            this.goingLeft = false;
-            this.goingUp = false;
-            console.log("left bottom");
-            break;
-          }
-
-          if (collidedOnTopSide) {
-            this.goingLeft = false;
-            this.goingUp = true;
-            console.log("left top");
-            break;
-          }
-        } else if (collidedOnRightSide) {
-          if (this.currentPosition.y < m.currentPosition.y && this.currentPosition.y > m.currentPosition.y - padding) {
-            this.goingLeft = true;
-            this.goingUp = false;
-            break;
-            console.log("now left!");
-          } else if (this.currentPosition.y > m.currentPosition.y && this.currentPosition.y < m.currentPosition.y + padding) {
-            this.goingLeft = true;
-            this.goingUp = true;
-            break;
-          }
-        } */
       }
     }
     return collided;
@@ -176,16 +158,16 @@ function generateMovable({ isMovable }) {
 
 const movables = [];
 
-/* for (let n of new Array(2)) {
-  let movable = generateMovable();
+for (let n of new Array(505)) {
+  let movable = generateMovable({ isMovable: true });
   movables.push(movable);
   movable.init();
-} */
+}
 
-let movable1 = generateMovable({ isMovable: true });
+/* let movable1 = generateMovable({ isMovable: true });
 let movable2 = generateMovable({ isMovable: false });
 
-movables.push(movable1, movable2);
+movables.push(movable1, movable2); */
 
 /* INIT */
 c.beginPath();
