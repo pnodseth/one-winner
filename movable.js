@@ -13,13 +13,13 @@ export default class Movable {
     this.boardSize = boardSize;
     this.radius = 50;
     this.isMovable = isMovable;
-    this.isInfected = isInfected;
-    this.showInfection = isInfected ? true : false;
     this.collidables = collidables;
     this.type = type;
+    this.fillColor = "#333";
   }
 
   init() {
+    this.onInit();
     this.render();
   }
 
@@ -37,7 +37,7 @@ export default class Movable {
 
   render() {
     if (this.type === "circle") {
-      this.board.fillStyle = this.getFillColor();
+      this.board.fillStyle = this.fillColor;
       this.board.beginPath();
       this.board.arc(this.currentPosition.x, this.currentPosition.y, this.radius, 0, 2 * Math.PI);
       this.board.fill();
@@ -57,24 +57,12 @@ export default class Movable {
     if (this.isMovable) {
       this.updateXandYPosition();
     }
-    this.animatedCustomBehaviour({ collidedWith });
+
+    this.onAnimate({ collidedWith });
   }
 
-  animatedCustomBehaviour({ collidedWith }) {
-    if (collidedWith) {
-      if (this.isInfected && !collidedWith.isInfected) {
-        collidedWith.isInfected = true;
-        setTimeout(() => {
-          collidedWith.showInfection = true;
-        }, 1);
-      }
-    }
-  }
-
-  getFillColor() {
-    if (this.isInfected && this.showInfection) return "tomato";
-    else return "#333";
-  }
+  onInit() {}
+  onAnimate() {}
 
   checkCollisions() {
     for (let m of this.collidables) {

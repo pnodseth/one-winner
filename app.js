@@ -12,13 +12,13 @@ function start(canvas) {
   ctx.lineWidth = 1;
 
   for (let n of new Array(10)) {
-    let movable = generateMovable({ isMovable: true, width: canvasWidth, height: canvasHeight, ctx, allCollidables });
+    let movable = generateMovable({ isInfected: false, isMovable: true, width: canvasWidth, height: canvasHeight, ctx, allCollidables });
     allCollidables.push(movable);
     movable.init();
   }
 
   for (let n of new Array(2)) {
-    let movable = generateMovable({ isMovable: false, width: canvasWidth, height: canvasHeight, ctx, allCollidables, isInfected: true });
+    let movable = generateMovable({ isInfected: true, isMovable: false, width: canvasWidth, height: canvasHeight, ctx, allCollidables, isInfected: true });
     allCollidables.push(movable);
     movable.init();
   }
@@ -44,7 +44,7 @@ function start(canvas) {
   }, 1);
 }
 
-function generateMovable({ isMovable, width, height, ctx, isInfected, allCollidables, type }) {
+function generateMovable({ isInfected, isMovable = true, width, height, ctx, allCollidables, type }) {
   let startPosition = {
     x: Math.random() * width,
     y: Math.random() * height + 50
@@ -59,7 +59,7 @@ function generateMovable({ isMovable, width, height, ctx, isInfected, allCollida
     goingLeft: Math.random() < 0.5 ? true : false
   };
 
-  return new Infectable({ ctx, boardSize: { width, height }, startPosition, direction, isMovable, isInfected, collidables: allCollidables, type });
+  return new Infectable({ isInfected, ctx, boardSize: { width, height }, startPosition, direction, isMovable, collidables: allCollidables, type });
 }
 
 /* INIT */
