@@ -23,6 +23,11 @@ export default class Movable {
     this.render();
   }
 
+  setPosition(x, y) {
+    this.currentPosition.x = x;
+    this.currentPosition.y = y;
+  }
+
   get boardBounds() {
     return {
       width: this.boardSize.width - this.radius, // Add 2px security padding
@@ -41,21 +46,27 @@ export default class Movable {
   }
 
   animate() {
-    if (this.currentPosition.x <= this.boardBounds.width + 10 && this.currentPosition.y <= this.boardBounds.height + 10) {
-      this.render();
+    this.render();
 
-      if (this.isMovable) {
-        this.checkIfReachedBounds();
-        let collidedWith = this.checkCollisions();
-        if (collidedWith) {
-          if (this.isInfected && !collidedWith.isInfected) {
-            collidedWith.isInfected = true;
-            setTimeout(() => {
-              collidedWith.showInfection = true;
-            }, 10000);
-          }
-        }
-        this.updateXandYPosition();
+    if (this.isMovable) {
+      this.checkIfReachedBounds();
+    }
+
+    let collidedWith = this.checkCollisions();
+
+    if (this.isMovable) {
+      this.updateXandYPosition();
+    }
+    this.animatedCustomBehaviour({ collidedWith });
+  }
+
+  animatedCustomBehaviour({ collidedWith }) {
+    if (collidedWith) {
+      if (this.isInfected && !collidedWith.isInfected) {
+        collidedWith.isInfected = true;
+        setTimeout(() => {
+          collidedWith.showInfection = true;
+        }, 1);
       }
     }
   }
@@ -133,22 +144,22 @@ export default class Movable {
 
   checkIfReachedBounds() {
     /* Check if we're reached the top */
-    if (this.currentPosition.y <= this.radius) {
+    if (this.currentPosition.y <= 0 + this.radius) {
       this.goingUp = false;
       this.angle.y = 1 - this.angle.y;
     }
 
     /* Check if we've reached the bottom */
-    if (this.currentPosition.y >= this.boardBounds.height) {
+    if (this.currentPosition.y >= this.boardBounds.height - this.radius) {
       this.goingUp = true;
       this.angle.y = 1 - this.angle.y - (Math.random() * (0.3 - 0.1) + 0.1);
     }
 
     /* Check if we've reached left or right bound */
-    if (this.currentPosition.x >= this.boardBounds.width) {
+    if (this.currentPosition.x >= this.boardBounds.width - this.radius) {
       this.goingLeft = true;
       this.angle.x = 1 - this.angle.x - (Math.random() * (0.15 - 0.1) + 0.1);
-    } else if (this.currentPosition.x <= this.radius) {
+    } else if (this.currentPosition.x <= 0 + this.radius) {
       this.goingLeft = false;
       this.angle.x = 1 - this.angle.x;
     }

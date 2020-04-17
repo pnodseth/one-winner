@@ -17,7 +17,7 @@ function start(canvas) {
   }
 
   for (let n of new Array(2)) {
-    let movable = generateMovable({ isMovable: false, width: canvasWidth, height: canvasHeight, ctx, allCollidables });
+    let movable = generateMovable({ isMovable: false, width: canvasWidth, height: canvasHeight, ctx, allCollidables, isInfected: true });
     allCollidables.push(movable);
     movable.init();
   }
@@ -48,6 +48,11 @@ function generateMovable({ isMovable, width, height, ctx, isInfected, allCollida
     x: Math.random() * width,
     y: Math.random() * height + 50
   };
+  let boardMargin = 50;
+  if (startPosition.x < boardMargin) startPosition.x = boardMargin;
+  if (startPosition.x > width - boardMargin) startPosition.x = width - boardMargin;
+  if (startPosition.y > height - boardMargin) startPosition.y = height - boardMargin;
+  if (startPosition.y < boardMargin) startPosition.y = boardMargin;
   let direction = {
     goingUp: Math.random() < 0.5 ? true : false,
     goingLeft: Math.random() < 0.5 ? true : false
