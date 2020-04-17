@@ -1,4 +1,5 @@
 import Movable from "./movable.js";
+import Infectable from "./InfectableMovable.js";
 const canvas = document.getElementById("canvas");
 
 start(canvas);
@@ -58,7 +59,7 @@ function generateMovable({ isMovable, width, height, ctx, isInfected, allCollida
     goingLeft: Math.random() < 0.5 ? true : false
   };
 
-  return new Movable({ ctx, boardSize: { width, height }, startPosition, direction, isMovable, isInfected, collidables: allCollidables, type });
+  return new Infectable({ ctx, boardSize: { width, height }, startPosition, direction, isMovable, isInfected, collidables: allCollidables, type });
 }
 
 /* INIT */
