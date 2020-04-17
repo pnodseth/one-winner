@@ -41,6 +41,7 @@ export default class Movable {
       this.board.beginPath();
       this.board.arc(this.currentPosition.x, this.currentPosition.y, this.radius, 0, 2 * Math.PI);
       this.board.fill();
+      this.onRender();
     } else if (this.type === "rect") {
     }
   }
@@ -63,6 +64,7 @@ export default class Movable {
 
   onInit() {}
   onAnimate() {}
+  onRender() {}
 
   checkCollisions() {
     for (let m of this.collidables) {

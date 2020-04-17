@@ -1,5 +1,6 @@
 import Movable from "./movable.js";
 import Infectable from "./InfectableMovable.js";
+import Person from "./Person.js";
 const canvas = document.getElementById("canvas");
 
 start(canvas);
@@ -11,17 +12,19 @@ function start(canvas) {
   const ctx = canvas.getContext("2d");
   ctx.lineWidth = 1;
 
-  for (let n of new Array(10)) {
-    let movable = generateMovable({ isInfected: false, isMovable: true, width: canvasWidth, height: canvasHeight, ctx, allCollidables });
+  const people = [{ name: "Pål" }, { name: "Carl" }, { name: "Bendik" }, { name: "Rolf" }, { name: "Hege" }];
+
+  for (let n of people) {
+    let movable = generateMovable({ name: n.name, isInfected: false, isMovable: true, width: canvasWidth, height: canvasHeight, ctx, allCollidables });
     allCollidables.push(movable);
     movable.init();
   }
 
-  for (let n of new Array(2)) {
+  /* for (let n of new Array(2)) {
     let movable = generateMovable({ isInfected: true, isMovable: false, width: canvasWidth, height: canvasHeight, ctx, allCollidables, isInfected: true });
     allCollidables.push(movable);
     movable.init();
-  }
+  } */
 
   /*   for (let n of new Array(20)) {
     let movable = generateMovable({ isMovable: false, width: canvasWidth, height: canvasHeight, ctx });
@@ -44,7 +47,7 @@ function start(canvas) {
   }, 1);
 }
 
-function generateMovable({ isInfected, isMovable = true, width, height, ctx, allCollidables, type }) {
+function generateMovable({ name, isInfected, isMovable = true, width, height, ctx, allCollidables, type }) {
   let startPosition = {
     x: Math.random() * width,
     y: Math.random() * height + 50
@@ -59,7 +62,7 @@ function generateMovable({ isInfected, isMovable = true, width, height, ctx, all
     goingLeft: Math.random() < 0.5 ? true : false
   };
 
-  return new Infectable({ isInfected, ctx, boardSize: { width, height }, startPosition, direction, isMovable, collidables: allCollidables, type });
+  return new Person({ name, isInfected, ctx, boardSize: { width, height }, startPosition, direction, isMovable, collidables: allCollidables, type });
 }
 
 /* INIT */
