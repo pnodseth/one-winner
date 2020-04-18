@@ -8,7 +8,7 @@ export default class Movable {
       y: 0.5
     };
     this.currentPosition = startPosition;
-    this.speed = 1;
+    this.speed = 1.5;
     this.board = ctx;
     this.boardSize = boardSize;
     this.radius = 50;
@@ -16,11 +16,7 @@ export default class Movable {
     this.collidables = collidables;
     this.type = type;
     this.fillColor = "#333";
-  }
-
-  init() {
-    this.onInit();
-    this.render();
+    this.isColliding = false;
   }
 
   setPosition(x, y) {
@@ -35,36 +31,21 @@ export default class Movable {
     };
   }
 
-  render() {
+  draw() {
     if (this.type === "circle") {
       this.board.fillStyle = this.fillColor;
       this.board.beginPath();
       this.board.arc(this.currentPosition.x, this.currentPosition.y, this.radius, 0, 2 * Math.PI);
       this.board.fill();
-      this.onRender();
-    } else if (this.type === "rect") {
-    }
-  }
-
-  animate() {
-    this.render();
-
-    if (this.isMovable) {
-      this.checkIfReachedBounds();
     }
 
-    let collidedWith = this.checkCollisions();
-
-    if (this.isMovable) {
-      this.updateXandYPosition();
-    }
-
-    this.onAnimate({ collidedWith });
+    this.onDraw();
   }
 
   onInit() {}
   onAnimate() {}
-  onRender() {}
+  onDraw() {}
+  onCollision() {}
 
   checkCollisions() {
     for (let m of this.collidables) {
@@ -84,7 +65,8 @@ export default class Movable {
           } else {
             this.goingUp = false;
           }
-          return m;
+          this.onCollision(m);
+          return;
         } else if (collidedOnLeftSide && collidedOnBottomSide) {
           let xDiff = this.currentPosition.x - m.currentPosition.x;
           let yDiff = m.currentPosition.y - this.currentPosition.y;
@@ -93,7 +75,8 @@ export default class Movable {
           } else {
             this.goingUp = true;
           }
-          return m;
+          //this.onCollision(m);
+          return;
         } else if (collidedOnRightSide && collidedOnTopSide) {
           let xDiff = m.currentPosition.x - this.currentPosition.x;
           let yDiff = this.currentPosition.y - m.currentPosition.y;
@@ -102,7 +85,8 @@ export default class Movable {
           } else {
             this.goingUp = false;
           }
-          return m;
+          //this.onCollision(m);
+          return;
         } else if (collidedOnRightSide && collidedOnBottomSide) {
           let xDiff = m.currentPosition.x - this.currentPosition.x;
           let yDiff = m.currentPosition.y - this.currentPosition.y;
@@ -111,14 +95,16 @@ export default class Movable {
           } else {
             this.goingUp = true;
           }
-          return m;
+          //this.onCollision(m);
+          return;
         }
       }
     }
+    this.checkIfReachedBounds();
     return null;
   }
 
-  updateXandYPosition() {
+  update() {
     if (!this.goingUp) {
       this.currentPosition.y += this.angle.y * this.speed;
     } else {

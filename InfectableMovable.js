@@ -5,15 +5,13 @@ export default class Infectable extends Movable {
     super(movableOpts);
     this.isInfected = isInfected;
     this.showInfection = isInfected ? true : false;
-  }
 
-  onInit() {
-    if (this.isInfected) {
+    if (isInfected) {
       this.fillColor = "tomato";
     }
   }
 
-  onAnimate({ collidedWith }) {
+  onCollision(collidedWith) {
     if (collidedWith) {
       if (this.isInfected && !collidedWith.isInfected) {
         collidedWith.setInfected(true);
