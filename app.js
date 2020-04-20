@@ -103,18 +103,18 @@ function gameLoop(timeStamp) {
     }
 
     /* Remove players with no lives left */
-    for (let p = 0; p < allCollidables.length; p++) {
+    /* for (let p = 0; p < allCollidables.length; p++) {
       if (allCollidables[p].lives === 0) {
         let losingPlayer = allCollidables.splice(p, 1);
         losingPlayers.push(losingPlayer);
       }
-    }
+    } */
 
     for (let i = 0; i < allCollidables.length; i++) {
       if (allCollidables[i].isMovable) {
+        allCollidables[i].checkCollisions();
         allCollidables[i].update(secondsPassed);
       }
-      allCollidables[i].checkCollisions();
       allCollidables[i].draw(timeStamp);
     }
   }
@@ -154,7 +154,19 @@ function generateMovable({ name, monster, isInfected, isMovable = true, width, h
     goingLeft: Math.random() < 0.5 ? true : false
   };
 
-  return new Person({ name, monster, isInfected, ctx, boardSize: { width, height }, startPosition, direction, isMovable, collidables: allCollidables, type });
+  return new Person({
+    name,
+    monster,
+    losingPlayers,
+    isInfected,
+    ctx,
+    boardSize: { width, height },
+    startPosition,
+    direction,
+    isMovable,
+    collidables: allCollidables,
+    type
+  });
 }
 
 function getAvailablePosition(width, height, allCollidables) {
