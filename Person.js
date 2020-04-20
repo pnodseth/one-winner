@@ -13,7 +13,7 @@ export default class Person extends Infectable {
     super(opts);
     this.name = name;
     this.image = new Image();
-    this.lives = 2;
+    this.lives = 5;
     this.points = 0;
     this.isAttacking = false;
     this.currentPlayerState = playerStates.walking;
@@ -69,6 +69,7 @@ export default class Person extends Infectable {
     }
 
     this.runningCount = 1;
+    this.spriteCount = 1;
   }
 
   onDraw(timeStamp) {
@@ -77,19 +78,22 @@ export default class Person extends Infectable {
     /* Walking around */
     if (this.currentPlayerState === playerStates.walking) {
       this.runningCount++;
-      if (this.runningCount >= this.spritesRunning.length - 1) {
+
+      this.spriteCount = Math.floor(this.runningCount / 2);
+      if (this.spriteCount >= this.spritesRunning.length - 1) {
         this.runningCount = 1;
       }
-      this.board.drawImage(this.spritesRunning[this.runningCount], this.currentPosition.x, this.currentPosition.y, 150, 138);
+      this.board.drawImage(this.spritesRunning[this.spriteCount], this.currentPosition.x, this.currentPosition.y, 150, 138);
     }
 
     /* Is attacking */
     if (this.currentPlayerState === playerStates.attacking) {
-      if (this.runningCount < this.spritesAttacking.length - 1) {
+      this.spriteCount = Math.floor(this.runningCount / 2);
+      this.board.drawImage(this.spritesAttacking[this.spriteCount], this.currentPosition.x, this.currentPosition.y, 150, 138);
+
+      if (this.spriteCount < this.spritesAttacking.length - 1) {
         this.runningCount++;
       }
-
-      this.board.drawImage(this.spritesAttacking[this.runningCount], this.currentPosition.x, this.currentPosition.y, 150, 138);
 
       /* Being attacked */
     } else if (this.currentPlayerState === playerStates.beingAttacked) {
