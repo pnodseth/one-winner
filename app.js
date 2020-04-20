@@ -5,114 +5,124 @@ const canvas = document.getElementById("canvas");
 const placeSound = new Audio("./assets/sounds/test.mp3");
 const placeSound2 = new Audio("./assets/sounds/test.mp3");
 const placeSound3 = new Audio("./assets/sounds/test.mp3");
-let gameLoopInterval = null;
-start(canvas);
 
-function start(canvas) {
-  const allCollidables = [];
-  const losingPlayers = [];
-  const canvasWidth = canvas.clientWidth;
-  const canvasHeight = canvas.clientHeight;
-  const ctx = canvas.getContext("2d");
-  ctx.lineWidth = 1;
+window.gameLoopShouldRun = false;
+window.requestAnimationFrame(gameLoop);
+let secondsPassed = 0;
+let oldTimeStamp = 0;
+let movingSpeed = 50;
 
-  const people = [
-    { name: "Pål", type: "person" },
-    { name: "Carl", type: "person" },
-    { name: "Bendik", type: "person" },
-    { name: "Rolf", type: "person" },
-    { name: "Hege", type: "person" },
-    { name: "Ingvild", type: "person" },
-    { name: "Espen", type: "person" },
-    { name: "Håvard", type: "person" },
-    { name: "Helle", type: "person" },
-    { name: "Elisabeth", type: "person" },
-    { name: "Lucas", type: "person" },
-    { name: "Kim", type: "person" },
-    { name: "Hanne", type: "person" },
-    { name: "Maren", type: "person" },
-    { name: "Hanne L", type: "person" },
-    { name: "Martin", type: "person" },
-    { name: "C.G", type: "person" },
-    { name: "Peter", type: "person" },
-    { name: "Mads", type: "person" },
-    { name: "Kevin", type: "person" },
-    { name: "Cathrine", type: "person" },
-    { name: "Sunneva", type: "person" },
-    { name: "Demah", type: "person" },
-    { name: "Valeria", type: "person" },
-    { name: "Sanja", type: "person" },
-    { name: "Kristin", type: "person" }
-  ];
+const allCollidables = [];
+const losingPlayers = [];
+const canvasWidth = canvas.clientWidth;
+const canvasHeight = canvas.clientHeight;
+const ctx = canvas.getContext("2d");
+ctx.lineWidth = 1;
 
-  for (let n of people) {
-    let movable = generateMovable({
-      name: n.name,
-      isInfected: false,
-      isMovable: true,
-      width: canvasWidth,
-      height: canvasHeight,
-      ctx,
-      allCollidables,
-      type: n.type
-    });
-    allCollidables.push(movable);
+const people = [
+  { name: "Pål", type: "person", monster: 1 },
+  { name: "Carl", type: "person", monster: 1 },
+  { name: "Bendik", type: "person", monster: 1 },
+  { name: "Rolf", type: "person", monster: 1 },
+  { name: "Hege", type: "person", monster: 1 },
+  { name: "Ingvild", type: "person", monster: 1 },
+  { name: "Espen", type: "person", monster: 1 },
+  { name: "Håvard", type: "person", monster: 1 },
+  { name: "Helle", type: "person", monster: 1 },
+  { name: "Elisabeth", type: "person", monster: 1 },
+  { name: "Lucas", type: "person", monster: 1 },
+  { name: "Kim", type: "person", monster: 2 },
+  { name: "Hanne", type: "person", monster: 2 },
+  { name: "Maren", type: "person", monster: 1 },
+  { name: "Hanne L", type: "person", monster: 1 },
+  { name: "Martin", type: "person", monster: 1 },
+  { name: "C.G", type: "person", monster: 1 },
+  { name: "Peter", type: "person", monster: 1 },
+  { name: "Mads", type: "person", monster: 1 },
+  { name: "Kevin", type: "person", monster: 1 },
+  { name: "Cathrine", type: "person", monster: 1 },
+  { name: "Sunneva", type: "person", monster: 1 },
+  { name: "Demah", type: "person", monster: 2 },
+  { name: "Valeria", type: "person", monster: 2 },
+  { name: "Sanja", type: "person", monster: 2 },
+  { name: "Kristin", type: "person", monster: 2 }
+];
+
+for (let n of people) {
+  let movable = generateMovable({
+    name: n.name,
+    monster: n.monster,
+    isInfected: false,
+    isMovable: true,
+    width: canvasWidth,
+    height: canvasHeight,
+    ctx,
+    allCollidables,
+    type: n.type
+  });
+  allCollidables.push(movable);
+}
+
+/* ANIMATE */
+async function placePlayerOnBoard(p) {
+  return new Promise((res) => {
+    setTimeout(() => {
+      if (placeSound.paused) {
+        placeSound.play();
+      } else if (placeSound2.paused) {
+        placeSound2.play();
+      } else if (placeSound3.paused) {
+        placeSound3.play();
+      }
+      p.draw();
+      res();
+    }, 250);
+  });
+}
+
+async function placePlayersOnBoard() {
+  for (let p of allCollidables) {
+    await placePlayerOnBoard(p);
   }
+}
+window.placePlayersOnBoard = placePlayersOnBoard;
+window.toggleGameLoop = function () {
+  gameLoopShouldRun = !gameLoopShouldRun;
+};
 
-  /* ANIMATE */
-  async function placePlayerOnBoard(p) {
-    return new Promise((res) => {
-      setTimeout(() => {
-        if (placeSound.paused) {
-          placeSound.play();
-        } else if (placeSound2.paused) {
-          placeSound2.play();
-        } else if (placeSound3.paused) {
-          placeSound3.play();
-        }
-        p.draw();
-        res();
-      }, 250);
-    });
-  }
+function gameLoop(timeStamp) {
+  secondsPassed = (timeStamp - oldTimeStamp) / 1000;
+  oldTimeStamp = timeStamp;
 
-  async function placePlayersOnBoard() {
-    for (let p of allCollidables) {
-      await placePlayerOnBoard(p);
+  if (gameLoopShouldRun) {
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+    /* Check if game has ended */
+    if (allCollidables.length === 1) {
+      gameEnded(allCollidables, losingPlayers);
+    }
+
+    /* Remove players with no lives left */
+    for (let p = 0; p < allCollidables.length; p++) {
+      if (allCollidables[p].lives === 0) {
+        let losingPlayer = allCollidables.splice(p, 1);
+        losingPlayers.push(losingPlayer);
+      }
+    }
+
+    for (let i = 0; i < allCollidables.length; i++) {
+      if (allCollidables[i].isMovable) {
+        allCollidables[i].update(secondsPassed);
+      }
+      allCollidables[i].checkCollisions();
+      allCollidables[i].draw(timeStamp);
     }
   }
-  window.placePlayersOnBoard = placePlayersOnBoard;
-
-  window.startGame = function () {
-    gameLoopInterval = setInterval(() => {
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-      /* Check if game has ended */
-      if (allCollidables.length === 1) {
-        gameEnded(allCollidables, losingPlayers);
-      }
-
-      /* Remove players with no lives left */
-      for (let p = 0; p < allCollidables.length; p++) {
-        if (allCollidables[p].lives === 0) {
-          let losingPlayer = allCollidables.splice(p, 1);
-          losingPlayers.push(losingPlayer);
-        }
-      }
-
-      for (let i = 0; i < allCollidables.length; i++) {
-        if (allCollidables[i].isMovable) {
-          allCollidables[i].update();
-        }
-        allCollidables[i].checkCollisions();
-        allCollidables[i].draw();
-      }
-    }, 1);
-  };
+  window.requestAnimationFrame(gameLoop);
 }
 
 const gameEnded = (allCollidables, losingPlayers) => {
-  clearInterval(gameLoopInterval);
+  toggleGameLoop();
   console.log("The winner is: ", allCollidables[0].name);
 
   let all = [...allCollidables, ...losingPlayers];
@@ -128,7 +138,7 @@ const gameEnded = (allCollidables, losingPlayers) => {
   console.log("the one with most points: ", maxPoints[0].name);
 };
 
-function generateMovable({ name, isInfected, isMovable = true, width, height, ctx, allCollidables, type }) {
+function generateMovable({ name, monster, isInfected, isMovable = true, width, height, ctx, allCollidables, type }) {
   let { x, y } = getAvailablePosition(width, height, allCollidables);
   let startPosition = {
     x: x,
@@ -144,7 +154,7 @@ function generateMovable({ name, isInfected, isMovable = true, width, height, ct
     goingLeft: Math.random() < 0.5 ? true : false
   };
 
-  return new Person({ name, isInfected, ctx, boardSize: { width, height }, startPosition, direction, isMovable, collidables: allCollidables, type });
+  return new Person({ name, monster, isInfected, ctx, boardSize: { width, height }, startPosition, direction, isMovable, collidables: allCollidables, type });
 }
 
 function getAvailablePosition(width, height, allCollidables) {

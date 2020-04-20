@@ -8,7 +8,7 @@ export default class Movable {
       y: 0.5
     };
     this.currentPosition = startPosition;
-    this.speed = 1.5;
+    this.speed = 200;
     this.board = ctx;
     this.boardSize = boardSize;
     this.radius = 50;
@@ -31,7 +31,7 @@ export default class Movable {
     };
   }
 
-  draw() {
+  draw(timeStamp) {
     if (this.type === "circle") {
       this.board.fillStyle = this.fillColor;
       this.board.beginPath();
@@ -39,13 +39,13 @@ export default class Movable {
       this.board.fill();
     }
 
-    this.onDraw();
+    this.onDraw(timeStamp);
   }
 
   onInit() {}
-  onAnimate() {}
   onDraw() {}
   onCollision() {}
+  onUpdate() {}
 
   checkCollisions() {
     for (let m of this.collidables) {
@@ -104,18 +104,21 @@ export default class Movable {
     return null;
   }
 
-  update() {
-    if (!this.goingUp) {
-      this.currentPosition.y += this.angle.y * this.speed;
-    } else {
-      this.currentPosition.y -= this.angle.y * this.speed;
-    }
+  update(secondsPassed) {
+    if (this.type === "circle") {
+      if (!this.goingUp) {
+        this.currentPosition.y += this.angle.y * (this.speed * secondsPassed);
+      } else {
+        this.currentPosition.y -= this.angle.y * (this.speed * secondsPassed);
+      }
 
-    if (!this.goingLeft) {
-      this.currentPosition.x += this.angle.x * this.speed;
-    } else {
-      this.currentPosition.x -= this.angle.x * this.speed;
+      if (!this.goingLeft) {
+        this.currentPosition.x += this.angle.x * (this.speed * secondsPassed);
+      } else {
+        this.currentPosition.x -= this.angle.x * (this.speed * secondsPassed);
+      }
     }
+    this.onUpdate(secondsPassed);
   }
 
   checkIfReachedBounds() {
