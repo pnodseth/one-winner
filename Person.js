@@ -25,6 +25,7 @@ export default class Person extends Infectable {
     this.spritesDead = [];
     this.monsterType = monster;
     this.losingPlayers = losingPlayers;
+    this.isSpriteFlipped = true;
 
     /* Walking */
     for (let i = 0; i < 16; i++) {
@@ -74,48 +75,48 @@ export default class Person extends Infectable {
 
   onDraw(timeStamp) {
     /* Sprite */
-
+    this.board.save();
+    //this.board.rotate((20 * Math.PI) / 180);
+    this.board.this.spriteCount = Math.floor(this.runningCount / 2);
     /* Walking around */
     if (this.currentPlayerState === playerStates.walking) {
-      this.runningCount++;
-
-      this.spriteCount = Math.floor(this.runningCount / 2);
       if (this.spriteCount >= this.spritesRunning.length - 1) {
-        this.runningCount = 1;
+        this.runningCount = 0;
       }
       this.board.drawImage(this.spritesRunning[this.spriteCount], this.currentPosition.x, this.currentPosition.y, 150, 138);
     }
 
     /* Is attacking */
     if (this.currentPlayerState === playerStates.attacking) {
-      this.spriteCount = Math.floor(this.runningCount / 2);
       this.board.drawImage(this.spritesAttacking[this.spriteCount], this.currentPosition.x, this.currentPosition.y, 150, 138);
 
-      if (this.spriteCount < this.spritesAttacking.length - 1) {
-        this.runningCount++;
+      if (this.spriteCount === this.spritesAttacking.length - 1) {
+        this.doNotUpdateCounter = true; // If we reached end of animation sprites, keep showing last frame
       }
 
       /* Being attacked */
     } else if (this.currentPlayerState === playerStates.beingAttacked) {
-      if (this.runningCount < this.spritesHurt.length - 1) {
-        this.runningCount++;
+      if (this.spriteCount === this.spritesHurt.length - 1) {
+        this.doNotUpdateCounter = true; // If we reached end of animation sprites, keep showing last frame
       }
 
-      this.board.drawImage(this.spritesHurt[this.runningCount], this.currentPosition.x, this.currentPosition.y, 150, 138);
+      this.board.drawImage(this.spritesHurt[this.spriteCount], this.currentPosition.x, this.currentPosition.y, 150, 138);
 
       /* Dying */
     } else if (this.currentPlayerState === playerStates.dying) {
-      if (this.runningCount < this.spritesDying.length - 1) {
-        this.runningCount++;
+      if (this.spriteCount === this.spritesDying.length - 1) {
+        this.doNotUpdateCounter = true; // If we reached end of animation sprites, keep showing last frame
       }
 
-      this.board.drawImage(this.spritesDying[this.runningCount], this.currentPosition.x, this.currentPosition.y, 150, 138);
+      this.board.drawImage(this.spritesDying[this.spriteCount], this.currentPosition.x, this.currentPosition.y, 150, 138);
+
+      /* Dead */
     } else if (this.currentPlayerState === playerStates.dead) {
-      if (this.runningCount < this.spritesDead.length - 1) {
-        this.runningCount++;
+      if (this.spriteCount === this.spritesDead.length - 1) {
+        this.doNotUpdateCounter = true; // If we reached end of animation sprites, keep showing last frame
       }
 
-      this.board.drawImage(this.spritesDead[this.runningCount], this.currentPosition.x, this.currentPosition.y, 150, 138);
+      this.board.drawImage(this.spritesDead[this.spriteCount], this.currentPosition.x, this.currentPosition.y, 150, 138);
     }
 
     /* Text */
@@ -130,6 +131,8 @@ export default class Person extends Infectable {
     this.board.fillText(this.name, this.currentPosition.x, this.currentPosition.y);
     this.board.fillText(this.lives, this.currentPosition.x, this.currentPosition.y + 30);
     this.board.fill();
+
+    this.board.restore();
   }
 
   onUpdate(secondsPassed) {
@@ -145,6 +148,11 @@ export default class Person extends Infectable {
       } else {
         this.currentPosition.x -= this.angle.x * (this.speed * secondsPassed);
       }
+    }
+    if (!this.doNotUpdateCounter) {
+      this.runningCount++;
+    } else {
+      this.doNotUpdateCounter = false;
     }
   }
 
