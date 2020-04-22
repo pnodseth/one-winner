@@ -28,8 +28,8 @@ const people = [
   { name: "Ingvild", type: "person", monster: 3 },
   { name: "Espen", type: "person", monster: 3 },
   { name: "Håvard", type: "person", monster: 3 },
-  { name: "Helle", type: "person", monster: 1 },
-  { name: "Elisabeth", type: "person", monster: 1 },
+  { name: "Helle", type: "person", monster: 1 }
+  /*  { name: "Elisabeth", type: "person", monster: 1 },
   { name: "Lucas", type: "person", monster: 1 },
   { name: "Kim", type: "person", monster: 2 },
   { name: "Hanne", type: "person", monster: 2 },
@@ -45,7 +45,7 @@ const people = [
   { name: "Demah", type: "person", monster: 2 },
   { name: "Valeria", type: "person", monster: 2 },
   { name: "Sanja", type: "person", monster: 2 },
-  { name: "Kristin", type: "person", monster: 2 }
+  { name: "Kristin", type: "person", monster: 2 } */
 ];
 
 for (let n of people) {
