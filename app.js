@@ -1,10 +1,13 @@
-import Movable from "./movable.js";
-import Infectable from "./InfectableMovable.js";
 import Person from "./Person.js";
 const canvas = document.getElementById("canvas");
 const placeSound = new Audio("./assets/sounds/test.mp3");
 const placeSound2 = new Audio("./assets/sounds/test.mp3");
 const placeSound3 = new Audio("./assets/sounds/test.mp3");
+const gameSong = new Audio("./assets/sounds/9 - Heat Man.mp3");
+const placingSong = new Audio("./assets/sounds/4 - Stage Select.mp3");
+const winningSong = new Audio("./assets/sounds/20 - Dr. Wily Defeated!.mp3");
+const winningRef = document.querySelector(".winning");
+const winningNameRef = document.querySelector("#winning-name");
 
 window.gameLoopShouldRun = false;
 window.requestAnimationFrame(gameLoop);
@@ -20,14 +23,14 @@ const ctx = canvas.getContext("2d");
 ctx.lineWidth = 1;
 
 const people = [
-  { name: "Pål", type: "person", monster: 3 },
-  { name: "Carl", type: "person", monster: 3 },
+  { name: "Pål", type: "person", monster: 1 },
+  { name: "Carl", type: "person", monster: 2 },
   { name: "Bendik", type: "person", monster: 3 },
   { name: "Rolf", type: "person", monster: 3 },
-  { name: "Hege", type: "person", monster: 3 },
-  { name: "Ingvild", type: "person", monster: 3 },
+  { name: "Hege", type: "person", monster: 1 },
+  { name: "Ingvild", type: "person", monster: 2 },
   { name: "Espen", type: "person", monster: 3 },
-  { name: "Håvard", type: "person", monster: 3 },
+  { name: "Håvard", type: "person", monster: 4 },
   { name: "Helle", type: "person", monster: 1 }
   /*  { name: "Elisabeth", type: "person", monster: 1 },
   { name: "Lucas", type: "person", monster: 1 },
@@ -81,6 +84,9 @@ async function placePlayerOnBoard(p) {
 }
 
 async function placePlayersOnBoard() {
+  if (placingSong.paused) {
+    placingSong.play();
+  }
   for (let p of allCollidables) {
     await placePlayerOnBoard(p);
   }
@@ -88,6 +94,14 @@ async function placePlayersOnBoard() {
 window.placePlayersOnBoard = placePlayersOnBoard;
 window.toggleGameLoop = function () {
   gameLoopShouldRun = !gameLoopShouldRun;
+  if (gameSong.paused) {
+    if (!placingSong.paused) {
+      placingSong.pause();
+    }
+    gameSong.play();
+  } else {
+    gameSong.pause();
+  }
 };
 
 function gameLoop(timeStamp) {
@@ -124,6 +138,9 @@ function gameLoop(timeStamp) {
 const gameEnded = (allCollidables, losingPlayers) => {
   toggleGameLoop();
   console.log("The winner is: ", allCollidables[0].name);
+  winningSong.play();
+  winningRef.classList.add("winning-visible");
+  winningNameRef.innerText = allCollidables[0].name;
 
   let all = [...allCollidables, ...losingPlayers];
   let maxPoints = all.reduce(
@@ -149,6 +166,7 @@ function generateMovable({ name, monster, isInfected, isMovable = true, width, h
   if (startPosition.x > width - boardMargin) startPosition.x = width - boardMargin;
   if (startPosition.y > height - boardMargin) startPosition.y = height - boardMargin;
   if (startPosition.y < boardMargin) startPosition.y = boardMargin;
+  if (startPosition.y > height - boardMargin) startPosition.y = height - boardMargin;
   let direction = {
     goingUp: Math.random() < 0.5 ? true : false,
     goingLeft: Math.random() < 0.5 ? true : false

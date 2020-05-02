@@ -8,7 +8,7 @@ export default class Movable {
       y: 0.5
     };
     this.currentPosition = startPosition;
-    this.speed = 200;
+    this.speed = 250;
     this.board = ctx;
     this.boardSize = boardSize;
     this.radius = 50;
@@ -71,7 +71,9 @@ export default class Movable {
           let xDiff = this.currentPosition.x - m.currentPosition.x;
           let yDiff = m.currentPosition.y - this.currentPosition.y;
           if (xDiff > yDiff) {
-            this.goingLeft = false;
+            if (!this.doNotChangeDirection) {
+              this.goingLeft = false;
+            }
           } else {
             this.goingUp = true;
           }
@@ -81,7 +83,9 @@ export default class Movable {
           let xDiff = m.currentPosition.x - this.currentPosition.x;
           let yDiff = this.currentPosition.y - m.currentPosition.y;
           if (xDiff > yDiff) {
-            this.goingLeft = true;
+            if (!this.doNotChangeDirection) {
+              this.goingLeft = true;
+            }
           } else {
             this.goingUp = false;
           }
@@ -91,7 +95,9 @@ export default class Movable {
           let xDiff = m.currentPosition.x - this.currentPosition.x;
           let yDiff = m.currentPosition.y - this.currentPosition.y;
           if (xDiff > yDiff) {
-            this.goingLeft = true;
+            if (!this.doNotChangeDirection) {
+              this.goingLeft = true;
+            }
           } else {
             this.goingUp = true;
           }

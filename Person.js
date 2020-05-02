@@ -13,7 +13,7 @@ export default class Person extends Infectable {
     super(opts);
     this.name = name;
     this.image = new Image();
-    this.lives = 3;
+    this.lives = 1;
     this.points = 0;
     this.isAttacking = false;
     this.currentPlayerState = playerStates.walking;
@@ -29,6 +29,7 @@ export default class Person extends Infectable {
 
     this.runningCount = 1;
     this.spriteCount = 1;
+    this.doNotChangeDirection = false;
   }
 
   onDraw(timeStamp) {
@@ -48,7 +49,7 @@ export default class Person extends Infectable {
       this.board.drawImage(
         this.spritesRunning[this.spriteCount],
         this.goingLeft ? -this.currentPosition.x - 80 : this.currentPosition.x - 80,
-        this.currentPosition.y,
+        this.currentPosition.y - 30,
         150,
         138
       );
@@ -59,7 +60,7 @@ export default class Person extends Infectable {
       this.board.drawImage(
         this.spritesAttacking[this.spriteCount],
         this.goingLeft ? -this.currentPosition.x - 80 : this.currentPosition.x - 80,
-        this.currentPosition.y,
+        this.currentPosition.y - 30,
         150,
         138
       );
@@ -77,7 +78,7 @@ export default class Person extends Infectable {
       this.board.drawImage(
         this.spritesHurt[this.spriteCount],
         this.goingLeft ? -this.currentPosition.x - 80 : this.currentPosition.x - 80,
-        this.currentPosition.y,
+        this.currentPosition.y - 30,
         150,
         138
       );
@@ -91,7 +92,7 @@ export default class Person extends Infectable {
       this.board.drawImage(
         this.spritesDying[this.spriteCount],
         this.goingLeft ? -this.currentPosition.x - 80 : this.currentPosition.x - 80,
-        this.currentPosition.y,
+        this.currentPosition.y - 30,
         150,
         138
       );
@@ -105,7 +106,7 @@ export default class Person extends Infectable {
       this.board.drawImage(
         this.spritesDead[this.spriteCount],
         this.goingLeft ? -this.currentPosition.x - 80 : this.currentPosition.x - 80,
-        this.currentPosition.y,
+        this.currentPosition.y - 30,
         150,
         138
       );
@@ -116,14 +117,14 @@ export default class Person extends Infectable {
     /* Text */
     this.board.beginPath();
     if (this.currentPlayerState === playerStates.beingAttacked) {
+      console.log("being attacked!!!");
       this.board.fillStyle = "red";
     } else {
       this.board.fillStyle = "#333";
     }
-    this.board.font = "bold 32px Verdana";
+    this.board.font = "bold 24px Verdana";
     this.board.textAlign = "center";
-    this.board.fillText(this.name, this.currentPosition.x, this.currentPosition.y);
-    this.board.fillText(this.lives, this.currentPosition.x, this.currentPosition.y + 30);
+    this.board.fillText(this.name + " (" + this.lives + ") ", this.currentPosition.x, this.currentPosition.y + 120);
     this.board.fill();
   }
 
@@ -153,10 +154,11 @@ export default class Person extends Infectable {
       /* Player is walking,  */
       if (this.currentPlayerState === playerStates.walking && collidedWith.currentPlayerState === playerStates.walking) {
         this.lives -= 1;
-        if (this.lives > 1) {
-          this.currentPlayerState = playerStates.beingAttacked;
-        } else {
-          this.currentPlayerState = playerStates.dying;
+        this.currentPlayerState = playerStates.beingAttacked;
+        if (this.lives === 0) {
+          setTimeout(() => {
+            this.currentPlayerState = playerStates.dying;
+          }, 100);
 
           /* Show dead animation */
           setTimeout(() => {
@@ -181,7 +183,7 @@ export default class Person extends Infectable {
 
         setTimeout(() => {
           collidedWith.currentPlayerState = playerStates.walking;
-          //collidedWith.doNotChangeDirection = true;
+          collidedWith.doNotChangeDirection = true;
         }, 400);
 
         setTimeout(() => {
